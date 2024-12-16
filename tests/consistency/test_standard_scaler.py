@@ -2,15 +2,20 @@ from __future__ import annotations
 
 import torch
 from coola import objects_are_allclose
-from sklearn.preprocessing import StandardScaler as SklearnStandardScaler
 
 from tabutorch.preprocessing import StandardScaler
+from tabutorch.testing import sklearn_available
+from tabutorch.utils.imports import is_sklearn_available
+
+if is_sklearn_available():
+    from sklearn.preprocessing import StandardScaler as SklearnStandardScaler
 
 ####################################
 #     Tests for StandardScaler     #
 ####################################
 
 
+@sklearn_available
 def test_standard_scaler_fit() -> None:
     x = torch.randn(100, 10)
     # sklearn uses the unbiased variant to estimate the standard deviation
@@ -23,6 +28,7 @@ def test_standard_scaler_fit() -> None:
     assert objects_are_allclose(m1.scale.numpy().astype(float), m2.scale_, atol=1e-6)
 
 
+@sklearn_available
 def test_standard_scaler_fit_transform() -> None:
     x = torch.randn(100, 10)
     # sklearn uses the unbiased variant to estimate the standard deviation
@@ -36,6 +42,7 @@ def test_standard_scaler_fit_transform() -> None:
     assert objects_are_allclose(out1.numpy(), out2, atol=1e-6)
 
 
+@sklearn_available
 def test_standard_scaler_transform() -> None:
     x = torch.randn(100, 10)
     # sklearn uses the unbiased variant to estimate the standard deviation
@@ -51,6 +58,7 @@ def test_standard_scaler_transform() -> None:
     assert objects_are_allclose(out1.numpy(), out2, atol=1e-6)
 
 
+@sklearn_available
 def test_standard_scaler_fit_transform_1_sample() -> None:
     x = torch.randn(1, 10)
     # sklearn uses the unbiased variant to estimate the standard deviation

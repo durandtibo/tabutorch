@@ -13,7 +13,7 @@ from tabutorch.preprocessing import StandardScaler
 SIZES = [1, 2, 3]
 
 # TODO (tibo): behavior for batch size == 1  # noqa: TD003
-# TODO (tibo): behavior when std == 0 # noqa: TD003
+# TODO (tibo): behavior when scale == 0 # noqa: TD003
 # TODO (tibo): behavior when NaN values # noqa: TD003
 
 ####################################
@@ -29,7 +29,7 @@ def test_standard_scaler_str() -> None:
 def test_standard_scaler_init_feature_size(feature_size: int) -> None:
     module = StandardScaler(num_features=feature_size)
     assert module.mean.equal(torch.zeros(feature_size))
-    assert module.std.equal(torch.ones(feature_size))
+    assert module.scale.equal(torch.ones(feature_size))
 
 
 @pytest.mark.parametrize("device", get_available_devices())
@@ -129,7 +129,25 @@ def test_standard_scaler_fit_custom(device: str, mode: bool) -> None:
         OrderedDict(
             {
                 "mean": torch.tensor([2.0, 2.0, 3.0, 2.0], device=device),
-                "std": torch.tensor([2.0, 1.0, 1.0, 1.0], device=device),
+                "scale": torch.tensor([2.0, 1.0, 1.0, 1.0], device=device),
+            }
+        ),
+    )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_fit_constant(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4).to(device=device)
+    module.train(mode)
+    module.fit(torch.ones(10, 4, device=device))
+    assert objects_are_allclose(
+        module.state_dict(),
+        OrderedDict(
+            {
+                "mean": torch.tensor([1.0, 1.0, 1.0, 1.0], device=device),
+                "scale": torch.tensor([1.0, 1.0, 1.0, 1.0], device=device),
             }
         ),
     )
@@ -185,7 +203,7 @@ def test_standard_scaler_fit_transform_custom(device: str, mode: bool) -> None:
         OrderedDict(
             {
                 "mean": torch.tensor([2.0, 2.0, 3.0, 2.0], device=device),
-                "std": torch.tensor([2.0, 1.0, 1.0, 1.0], device=device),
+                "scale": torch.tensor([2.0, 1.0, 1.0, 1.0], device=device),
             }
         ),
     )
@@ -195,6 +213,25 @@ def test_standard_scaler_fit_transform_custom(device: str, mode: bool) -> None:
             [[1.0, 1.0, 1.0, -1.0], [-1.0, -1.0, 0.0, 1.0], [0.0, 0.0, -1.0, 0.0]], device=device
         ),
     )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_fit_transform_constant(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4).to(device=device)
+    module.train(mode)
+    out = module.fit_transform(torch.ones(10, 4, device=device))
+    assert objects_are_allclose(
+        module.state_dict(),
+        OrderedDict(
+            {
+                "mean": torch.tensor([1.0, 1.0, 1.0, 1.0], device=device),
+                "scale": torch.tensor([1.0, 1.0, 1.0, 1.0], device=device),
+            }
+        ),
+    )
+    assert objects_are_allclose(out, torch.zeros(10, 4, device=device))
 
 
 @pytest.mark.parametrize("device", get_available_devices())
@@ -234,7 +271,7 @@ def test_standard_scaler_transform_custom(device: str, mode: bool) -> None:
     device = torch.device(device)
     module = StandardScaler(num_features=4).to(device=device)
     module.load_state_dict(
-        {"mean": torch.tensor([1, 2, 3, 4]), "std": torch.tensor([0.1, 0.2, 0.3, 0.4])}
+        {"mean": torch.tensor([1, 2, 3, 4]), "scale": torch.tensor([0.1, 0.2, 0.3, 0.4])}
     )
     module.train(mode)
     out = module.transform(
@@ -250,10 +287,10 @@ def test_standard_scaler_transform_custom(device: str, mode: bool) -> None:
 
 def test_standard_scaler_load_state_dict() -> None:
     module = StandardScaler(num_features=4)
-    module.load_state_dict({"mean": -torch.ones(4), "std": torch.ones(4).mul(0.5)})
+    module.load_state_dict({"mean": -torch.ones(4), "scale": torch.ones(4).mul(0.5)})
     assert objects_are_equal(module(torch.ones(2, 4)), torch.ones(2, 4).mul(4.0))
     assert objects_are_equal(
-        module.state_dict(), OrderedDict({"mean": -torch.ones(4), "std": torch.ones(4).mul(0.5)})
+        module.state_dict(), OrderedDict({"mean": -torch.ones(4), "scale": torch.ones(4).mul(0.5)})
     )
 
 
@@ -261,5 +298,5 @@ def test_standard_scaler_state_dict() -> None:
     module = StandardScaler(num_features=4)
     assert objects_are_equal(module(torch.ones(2, 4)), torch.ones(2, 4))
     assert objects_are_equal(
-        module.state_dict(), OrderedDict({"mean": torch.zeros(4), "std": torch.ones(4)})
+        module.state_dict(), OrderedDict({"mean": torch.zeros(4), "scale": torch.ones(4)})
     )

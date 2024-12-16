@@ -20,7 +20,7 @@ def test_standard_scaler_fit() -> None:
     m2.fit(x.numpy())
     # The mean and standard deviation are computed using the float64 precision
     assert objects_are_allclose(m1.mean.numpy().astype(float), m2.mean_, atol=1e-6)
-    assert objects_are_allclose(m1.std.numpy().astype(float), m2.scale_, atol=1e-6)
+    assert objects_are_allclose(m1.scale.numpy().astype(float), m2.scale_, atol=1e-6)
 
 
 def test_standard_scaler_fit_transform() -> None:
@@ -32,7 +32,7 @@ def test_standard_scaler_fit_transform() -> None:
     out2 = m2.fit_transform(x.numpy())
     # The mean and standard deviation are computed using the float64 precision
     assert objects_are_allclose(m1.mean.numpy().astype(float), m2.mean_, atol=1e-6)
-    assert objects_are_allclose(m1.std.numpy().astype(float), m2.scale_, atol=1e-6)
+    assert objects_are_allclose(m1.scale.numpy().astype(float), m2.scale_, atol=1e-6)
     assert objects_are_allclose(out1.numpy(), out2, atol=1e-6)
 
 
@@ -47,7 +47,7 @@ def test_standard_scaler_transform() -> None:
     out2 = m2.transform(x.numpy())
     # The mean and standard deviation are computed using the float64 precision
     assert objects_are_allclose(m1.mean.numpy().astype(float), m2.mean_, atol=1e-6)
-    assert objects_are_allclose(m1.std.numpy().astype(float), m2.scale_, atol=1e-6)
+    assert objects_are_allclose(m1.scale.numpy().astype(float), m2.scale_, atol=1e-6)
     assert objects_are_allclose(out1.numpy(), out2, atol=1e-6)
 
 
@@ -60,5 +60,5 @@ def test_standard_scaler_fit_transform_1_sample() -> None:
     out2 = m2.fit_transform(x.numpy())
     # The mean and standard deviation are computed using the float64 precision
     assert objects_are_allclose(m1.mean.numpy().astype(float), m2.mean_, atol=1e-6)
-    assert objects_are_allclose(m1.std.numpy().astype(float), m2.scale_, atol=1e-6)
+    assert objects_are_allclose(m1.scale.numpy().astype(float), m2.scale_, atol=1e-6)
     assert objects_are_allclose(out1.numpy(), out2, atol=1e-6)

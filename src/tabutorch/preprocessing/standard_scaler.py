@@ -8,6 +8,7 @@ import torch
 from torch import Tensor
 
 from tabutorch.preprocessing import BaseTransformer
+from tabutorch.preprocessing.utils import handle_zeros_in_scale, is_constant_feature
 
 
 class StandardScaler(BaseTransformer[Tensor]):
@@ -54,7 +55,7 @@ class StandardScaler(BaseTransformer[Tensor]):
     def __init__(self, num_features: int, std_correction: int = 1) -> None:
         super().__init__()
         self.register_buffer(name="mean", tensor=torch.zeros(num_features))
-        self.register_buffer(name="std", tensor=torch.ones(num_features))
+        self.register_buffer(name="scale", tensor=torch.ones(num_features))
 
         self._std_correction = std_correction
 
@@ -65,11 +66,13 @@ class StandardScaler(BaseTransformer[Tensor]):
         dim = self.mean.shape[0]
         x = x.view(-1, dim)
         self.mean = x.mean(dim=0)
-        self.std = x.std(dim=0, correction=self._std_correction)
+        std = x.std(dim=0, correction=self._std_correction)
+        constant_mask = is_constant_feature(mean=self.mean, var=std.pow(2), n_samples=x.shape[0])
+        self.scale = handle_zeros_in_scale(std, copy=False, constant_mask=constant_mask)
 
     def fit_transform(self, x: Tensor) -> Tensor:
         self.fit(x)
         return self.transform(x)
 
     def transform(self, x: Tensor) -> Tensor:
-        return x.sub(self.mean).div(self.std)
+        return x.sub(self.mean).div(self.scale)

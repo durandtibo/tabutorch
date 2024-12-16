@@ -15,14 +15,17 @@ T = TypeVar("T")
 class BaseTransformer(Generic[T], Module):
     r"""Define the base class to implement a data transformer."""
 
+    def forward(self, x: T) -> T:
+        return self.transform(x)
+
     @abstractmethod
-    def fit(self, data: T) -> None:
+    def fit(self, x: T) -> None:
         pass
 
     @abstractmethod
-    def fit_transform(self, data: T) -> T:
+    def fit_transform(self, x: T) -> T:
         pass
 
     @abstractmethod
-    def transform(self, data: T) -> T:
+    def transform(self, x: T) -> T:
         pass

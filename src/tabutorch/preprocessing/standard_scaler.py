@@ -15,9 +15,9 @@ class StandardScaler(BaseTransformer[Tensor]):
     variance.
 
     The standard score of a sample ``x`` is calculated as:
-    ``z = (x - m) / s``
-    where ``m`` is the mean of the training samples,
-    and ``s`` is the standard deviation of the training samples.
+    ``z = (x - m) / s`` where ``m`` is the mean of the training
+    samples, and ``s`` is the standard deviation of the training
+    samples.
 
     Args:
         num_features: The number of features or channels of the input.
@@ -52,8 +52,9 @@ class StandardScaler(BaseTransformer[Tensor]):
 
     def fit(self, x: Tensor) -> None:
         dim = self.mean.shape[0]
-        self.mean = x.view(-1, dim).mean(dim=0)
-        self.std = x.view(-1, dim).std(dim=0)
+        x = x.view(-1, dim)
+        self.mean = x.mean(dim=0)
+        self.std = x.std(dim=0)
 
     def fit_transform(self, x: Tensor) -> Tensor:
         self.fit(x)

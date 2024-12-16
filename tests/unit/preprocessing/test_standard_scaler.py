@@ -6,11 +6,14 @@ import pytest
 import torch
 from coola import objects_are_allclose, objects_are_equal
 from coola.utils.tensor import get_available_devices
+from torch.nn.functional import mse_loss
 
 from tabutorch.preprocessing import StandardScaler
 
 SIZES = [1, 2, 3]
 
+# TODO (tibo): behavior for batch size == 1  # noqa: TD003
+# TODO (tibo): behavior when std == 0 # noqa: TD003
 
 ####################################
 #     Tests for StandardScaler     #
@@ -56,6 +59,20 @@ def test_standard_scaler_forward_3d(
     module.train(mode)
     x = torch.randn(batch_size, d1, feature_size, device=device)
     out = module(x)
+    assert objects_are_equal(out, x)
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("batch_size", SIZES)
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_backward(device: str, batch_size: int, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4).to(device=device)
+    module.train(mode)
+    x = torch.randn(batch_size, 4, device=device, requires_grad=True)
+    out = module(x)
+    loss = mse_loss(out, torch.randn(batch_size, 4, device=device)).mean()
+    loss.backward()
     assert objects_are_equal(out, x)
 
 

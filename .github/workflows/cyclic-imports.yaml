@@ -40,3 +40,7 @@ jobs:
       - name: check tabutorch.preprocessing
         run: |
           python -c "from tabutorch import preprocessing"
+
+      - name: check tabutorch.utils
+        run: |
+          python -c "from tabutorch import utils"

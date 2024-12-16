@@ -2,6 +2,7 @@ r"""Contain modules to prepare or transform data."""
 
 from __future__ import annotations
 
-__all__ = ["BaseTransformer"]
+__all__ = ["BaseTransformer", "StandardScaler"]
 
-from src.tabutorch.preprocessing.base import BaseTransformer
+from tabutorch.preprocessing.base import BaseTransformer
+from tabutorch.preprocessing.standard_scaler import StandardScaler

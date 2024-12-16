@@ -48,6 +48,10 @@ jobs:
 #        run: |
 #          make integration-test
 
+      - name: Run consistency tests
+        run: |
+          make consistency-test
+
 
   min:
     runs-on: ${{ matrix.os }}
@@ -92,3 +96,7 @@ jobs:
 #      - name: Run integration tests
 #        run: |
 #          make integration-test
+
+      - name: Run consistency tests
+        run: |
+          make consistency-test

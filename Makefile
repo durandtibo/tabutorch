@@ -2,8 +2,9 @@ SHELL=/bin/bash
 NAME=tabutorch
 SOURCE=src/$(NAME)
 TESTS=tests
-UNIT_TESTS=tests/unit
+CONSISTENCY_TESTS=tests/consistency
 INTEGRATION_TESTS=tests/integration
+UNIT_TESTS=tests/unit
 
 LAST_GIT_TAG := $(shell git tag --sort=taggerdate | grep -o 'v.*' | tail -1)
 DOC_TAG := $(shell echo $(LAST_GIT_TAG) | cut -c 2- | awk -F \. {'print $$1"."$$2'})
@@ -59,6 +60,10 @@ unit-test :
 .PHONY : unit-test-cov
 unit-test-cov :
 	python -m pytest --xdoctest --timeout 10 --cov-report html --cov-report xml --cov-report term --cov=$(NAME) $(UNIT_TESTS)
+
+.PHONY : consistency-test
+consistency-test :
+	python -m pytest --xdoctest --timeout 10 $(CONSISTENCY_TESTS)
 
 .PHONY : publish-pypi
 publish-pypi :

@@ -14,6 +14,7 @@ SIZES = [1, 2, 3]
 
 # TODO (tibo): behavior for batch size == 1  # noqa: TD003
 # TODO (tibo): behavior when std == 0 # noqa: TD003
+# TODO (tibo): behavior when NaN values # noqa: TD003
 
 ####################################
 #     Tests for StandardScaler     #

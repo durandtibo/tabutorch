@@ -168,3 +168,13 @@ def test_nanvar_correction_keepdim_3d() -> None:
         ),
         torch.tensor([[[8.0, 16.0, 16.0, 16.0]], [[16.0, 8.0, 16.0, 16.0]]]),
     )
+
+
+def test_nanvar_constant() -> None:
+    assert objects_are_allclose(nanvar(torch.ones(2, 3, 4)), torch.tensor(0.0))
+
+
+def test_nanvar_constant_nan() -> None:
+    assert objects_are_allclose(
+        nanvar(torch.full((2, 3), float("nan"))), torch.tensor(float("nan")), equal_nan=True
+    )

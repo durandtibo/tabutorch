@@ -90,4 +90,4 @@ def nanvar(
     mean = x.nanmean(dim=dim, keepdim=True)
     var = (x - mean).square().nansum(dim=dim, keepdim=keepdim)
     count = x.isnan().logical_not().sum(dim=dim, keepdim=keepdim)
-    return var.div(count - correction)
+    return var.div((count - correction).clamp_min(0))

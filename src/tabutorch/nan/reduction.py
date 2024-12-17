@@ -3,6 +3,7 @@ r"""Contain reduction functions to manage tensors with NaN values."""
 from __future__ import annotations
 
 __all__ = [
+    "max",
     "mean",
     "nanstd",
     "nanvar",
@@ -14,6 +15,55 @@ from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import torch
+
+
+def max(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.Tensor | torch.return_types.max:
+    r"""Return the max values.
+
+    Args:
+        x: The input tensor.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        correction: The difference between the sample size and sample
+            degrees of freedom.
+        keepdim: Whether the output tensor has dim retained or not.
+        nan_policy: The policy on how to handle NaN values in the input
+            tensor when estimating the max. The following options are
+            available: ``'omit'`` and ``'propagate'``.
+
+    Returns:
+        Returns the max values.
+
+    Raises:
+        ValueError: if the ``nan_policy`` value is incorrect.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import torch
+    >>> from tabutorch.nan import max
+    >>> max(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(2.)
+    >>> max(torch.tensor([1.0, 2.0, float("nan")]))
+    tensor(nan)
+    >>> max(torch.tensor([1.0, 2.0, float("nan")]), nan_policy="omit")
+    tensor(1.5000)
+
+    ```
+    """
+    if nan_policy == "propagate":
+        return x.max(dim=dim, keepdim=keepdim)
+    if nan_policy == "omit":
+        return x.nanmax(dim=dim, keepdim=keepdim)
+    msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
+    raise ValueError(msg)
 
 
 def mean(

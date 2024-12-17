@@ -2,7 +2,15 @@ r"""Contain utility functions to manage tensor with NaN values."""
 
 from __future__ import annotations
 
-__all__ = ["check_nan_policy", "contains_nan", "mean", "nanstd", "nanvar", "std"]
+__all__ = [
+    "check_nan_policy",
+    "contains_nan",
+    "mean",
+    "nanstd",
+    "nanvar",
+    "std",
+    "var",
+]
 
 from tabutorch.nan.policy import check_nan_policy, contains_nan
-from tabutorch.nan.reduction import mean, nanstd, nanvar, std
+from tabutorch.nan.reduction import mean, nanstd, nanvar, std, var

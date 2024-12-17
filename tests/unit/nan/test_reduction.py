@@ -4,7 +4,7 @@ import pytest
 import torch
 from coola import objects_are_allclose, objects_are_equal
 
-from tabutorch.nan import mean, nanstd, nanvar
+from tabutorch.nan import mean, nanstd, nanvar, std
 
 ##########################
 #     Tests for mean     #
@@ -52,6 +52,77 @@ def test_mean_nan_propagate_args() -> None:
 def test_mean_incorrect_nan_policy() -> None:
     with pytest.raises(ValueError, match="Incorrect 'nan_policy': incorrect"):
         mean(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="incorrect")
+
+
+#########################
+#     Tests for std     #
+#########################
+
+
+def test_std_no_nan() -> None:
+    assert objects_are_allclose(
+        std(torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])), torch.tensor(1.5811388492584229)
+    )
+
+
+def test_std_nan_omit() -> None:
+    assert objects_are_allclose(
+        std(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="omit"),
+        torch.tensor(1.8257418870925903),
+    )
+
+
+def test_std_nan_omit_dim() -> None:
+    assert objects_are_allclose(
+        std(
+            torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]),
+            dim=1,
+            keepdim=True,
+            nan_policy="omit",
+        ),
+        torch.tensor([[0.7071067690849304], [1.0]]),
+    )
+
+
+def test_std_nan_omit_correction_0() -> None:
+    assert objects_are_allclose(
+        std(
+            torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]),
+            dim=1,
+            correction=0,
+            nan_policy="omit",
+        ),
+        torch.tensor([0.5, 0.8164966106414795]),
+    )
+
+
+def test_std_nan_propagate() -> None:
+    assert objects_are_allclose(
+        std(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0])),
+        torch.tensor(float("nan")),
+        equal_nan=True,
+    )
+
+
+def test_std_nan_propagate_dim() -> None:
+    assert objects_are_allclose(
+        std(torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]), dim=1, keepdim=True),
+        torch.tensor([[float("nan")], [1.0]]),
+        equal_nan=True,
+    )
+
+
+def test_std_nan_propagate_correction_0() -> None:
+    assert objects_are_allclose(
+        std(torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]), dim=1, correction=0),
+        torch.tensor([float("nan"), 0.8164966106414795]),
+        equal_nan=True,
+    )
+
+
+def test_std_incorrect_nan_policy() -> None:
+    with pytest.raises(ValueError, match="Incorrect 'nan_policy': incorrect"):
+        std(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="incorrect")
 
 
 ############################

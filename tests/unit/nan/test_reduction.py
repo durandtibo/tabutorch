@@ -4,7 +4,7 @@ import pytest
 import torch
 from coola import objects_are_allclose, objects_are_equal
 
-from tabutorch.nan import mean, nanvar
+from tabutorch.nan import mean, nanstd, nanvar
 
 ##########################
 #     Tests for mean     #
@@ -52,6 +52,134 @@ def test_mean_nan_propagate_args() -> None:
 def test_mean_incorrect_nan_policy() -> None:
     with pytest.raises(ValueError, match="Incorrect 'nan_policy': incorrect"):
         mean(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="incorrect")
+
+
+############################
+#     Tests for nanstd     #
+############################
+
+
+@pytest.mark.parametrize(
+    "x",
+    [
+        torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, float("nan"), 9.0]),
+        torch.tensor([[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]),
+        torch.tensor([[[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]]),
+    ],
+)
+def test_nanstd_correction_0(x: torch.Tensor) -> None:
+    assert objects_are_allclose(nanstd(x, correction=0), torch.tensor(2.766644392345187))
+
+
+@pytest.mark.parametrize(
+    "x",
+    [
+        torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, float("nan"), 9.0]),
+        torch.tensor([[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]),
+        torch.tensor([[[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]]),
+    ],
+)
+def test_nanstd_correction_1(x: torch.Tensor) -> None:
+    assert objects_are_allclose(nanstd(x), torch.tensor(2.9344694047230853))
+
+
+def test_nanstd_correction_0_dim_0() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]
+            ),
+            correction=0,
+            dim=0,
+        ),
+        torch.tensor([2.0, 3.2659863723778924, 3.2659863723778924, 3.2659863723778924]),
+    )
+
+
+def test_nanstd_correction_0_dim_1() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]
+            ),
+            correction=0,
+            dim=1,
+        ),
+        torch.tensor([1.118033988749895, 1.118033988749895, 0.8164965930944731]),
+    )
+
+
+def test_nanstd_correction_1_dim_0() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]
+            ),
+            dim=0,
+        ),
+        torch.tensor([2.8284271247461903, 4.0, 4.0, 4.0]),
+    )
+
+
+def test_nanstd_correction_1_dim_1() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]
+            ),
+            dim=1,
+        ),
+        torch.tensor([1.2909944333459524, 1.2909944333459524, 1.0]),
+    )
+
+
+def test_nanstd_correction_keepdim_2d() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]
+            ),
+            keepdim=True,
+            dim=0,
+        ),
+        torch.tensor([[2.8284271247461903, 4.0, 4.0, 4.0]]),
+    )
+
+
+def test_nanstd_correction_keepdim_3d() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [
+                    [
+                        [0.0, 1.0, 2.0, 3.0],
+                        [4.0, 5.0, 6.0, 7.0],
+                        [float("nan"), 9.0, 10.0, 11.0],
+                    ],
+                    [
+                        [10.0, float("nan"), 12.0, 13.0],
+                        [14.0, 15.0, 16.0, 17.0],
+                        [18.0, 19.0, 20.0, 21.0],
+                    ],
+                ]
+            ),
+            keepdim=True,
+            dim=1,
+        ),
+        torch.tensor(
+            [[[2.8284271247461903, 4.0, 4.0, 4.0]], [[4.0, 2.8284271247461903, 4.0, 4.0]]]
+        ),
+    )
+
+
+def test_nanstd_constant() -> None:
+    assert objects_are_allclose(nanstd(torch.ones(2, 3, 4)), torch.tensor(0.0))
+
+
+def test_nanstd_constant_nan() -> None:
+    assert objects_are_allclose(
+        nanstd(torch.full((2, 3), float("nan"))), torch.tensor(float("nan")), equal_nan=True
+    )
 
 
 ############################

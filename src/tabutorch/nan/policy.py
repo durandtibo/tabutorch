@@ -24,7 +24,7 @@ def check_nan_policy(nan_policy: str) -> None:
 
     ```pycon
 
-    >>> from tabutorch.utils.nan import check_nan_policy
+    >>> from tabutorch.nan import check_nan_policy
     >>> check_nan_policy(nan_policy="omit")
 
     ```
@@ -61,7 +61,7 @@ def contains_nan(
     ```pycon
 
     >>> import torch
-    >>> from tabutorch.utils.nan import contains_nan
+    >>> from tabutorch.nan import contains_nan
     >>> contains_nan(torch.tensor([1.0, 2.0, 3.0]))
     False
     >>> contains_nan(torch.tensor([1.0, 2.0, float("nan")]))

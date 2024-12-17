@@ -8,9 +8,9 @@ import torch
 from coola.utils.format import repr_mapping_line
 from torch import Tensor
 
+from tabutorch.nan import check_nan_policy, contains_nan, mean, std
 from tabutorch.preprocessing import BaseTransformer
 from tabutorch.preprocessing.utils import handle_zeros_in_scale, is_constant_feature
-from tabutorch.utils.nan import check_nan_policy, contains_nan
 
 
 class StandardScaler(BaseTransformer[Tensor]):
@@ -86,10 +86,10 @@ class StandardScaler(BaseTransformer[Tensor]):
         contains_nan(x, nan_policy=self._nan_policy, name="'x'")
         dim = self.mean.shape[0]
         x = x.view(-1, dim)
-        self.mean = x.mean(dim=0)
-        std = x.std(dim=0, correction=self._std_correction)
-        constant_mask = is_constant_feature(mean=self.mean, var=std.pow(2), n_samples=x.shape[0])
-        self.scale = handle_zeros_in_scale(std, copy=False, constant_mask=constant_mask)
+        self.mean = mean(x, dim=0, nan_policy=self._nan_policy)
+        s = std(x, dim=0, correction=self._std_correction, nan_policy=self._nan_policy)
+        constant_mask = is_constant_feature(mean=self.mean, var=s.pow(2), n_samples=x.shape[0])
+        self.scale = handle_zeros_in_scale(s, copy=False, constant_mask=constant_mask)
 
     def fit_transform(self, x: Tensor) -> Tensor:
         self.fit(x)

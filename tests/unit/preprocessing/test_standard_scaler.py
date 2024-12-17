@@ -13,7 +13,6 @@ from tabutorch.preprocessing import StandardScaler
 SIZES = [1, 2, 3]
 SHAPES = [(2, 4), (2, 3, 4), (2, 3, 3, 4)]
 
-# TODO (tibo): behavior when NaN values # noqa: TD003
 
 ####################################
 #     Tests for StandardScaler     #
@@ -173,8 +172,8 @@ def test_standard_scaler_fit_nan_policy_omit(device: str, mode: bool) -> None:
         module.state_dict(),
         OrderedDict(
             {
-                "mean": torch.tensor([2.0, 2.0, 3.0, 2.0], device=device),
-                "scale": torch.tensor([2.0, 1.0, 1.0, 1.0], device=device),
+                "mean": torch.tensor([2.0, 2.0, 3.5, 2.0], device=device),
+                "scale": torch.tensor([2.0, 1.0, 0.7071067690849304, 1.0], device=device),
             }
         ),
     )
@@ -284,6 +283,92 @@ def test_standard_scaler_fit_transform_constant(device: str, mode: bool) -> None
 
 @pytest.mark.parametrize("device", get_available_devices())
 @pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_fit_transform_nan_policy_omit(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4, nan_policy="omit").to(device=device)
+    module.train(mode)
+    out = module.fit_transform(
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        )
+    )
+    assert objects_are_allclose(
+        module.state_dict(),
+        OrderedDict(
+            {
+                "mean": torch.tensor([2.0, 2.0, 3.5, 2.0], device=device),
+                "scale": torch.tensor([2.0, 1.0, 0.7071067690849304, 1.0], device=device),
+            }
+        ),
+    )
+    assert objects_are_allclose(
+        out,
+        torch.tensor(
+            [
+                [1.0, 1.0, 0.7071067932881648, -1.0],
+                [-1.0, -1.0, -0.7071067932881648, 1.0],
+                [0.0, 0.0, float("nan"), 0.0],
+            ],
+            device=device,
+        ),
+        equal_nan=True,
+    )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_fit_transform_nan_policy_propagate(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4).to(device=device)
+    module.train(mode)
+    out = module.fit_transform(
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        )
+    )
+    assert objects_are_allclose(
+        module.state_dict(),
+        OrderedDict(
+            {
+                "mean": torch.tensor([2.0, 2.0, float("nan"), 2.0], device=device),
+                "scale": torch.tensor([2.0, 1.0, float("nan"), 1.0], device=device),
+            }
+        ),
+        equal_nan=True,
+    )
+    assert objects_are_allclose(
+        out,
+        torch.tensor(
+            [
+                [1.0, 1.0, float("nan"), -1.0],
+                [-1.0, -1.0, float("nan"), 1.0],
+                [0.0, 0.0, float("nan"), 0.0],
+            ],
+            device=device,
+        ),
+        equal_nan=True,
+    )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_fit_transform_nan_policy_raise(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4, nan_policy="raise").to(device=device)
+    module.train(mode)
+    with pytest.raises(ValueError, match="'x' contains at least one NaN value"):
+        module.fit_transform(
+            torch.tensor(
+                [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+                device=device,
+            )
+        )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
 def test_standard_scaler_transform(device: str, mode: bool) -> None:
     device = torch.device(device)
     module = StandardScaler(num_features=3).to(device=device)
@@ -311,6 +396,72 @@ def test_standard_scaler_transform_shape(device: str, shape: tuple[int, ...], mo
     out = module.transform(x)
     assert x is not out
     assert objects_are_equal(out, x)
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_transform_nan_policy_omit(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4, nan_policy="omit").to(device=device)
+    module.train(mode)
+    out = module.transform(
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        )
+    )
+    assert objects_are_allclose(
+        out,
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        ),
+        equal_nan=True,
+    )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_transform_nan_policy_propagate(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4).to(device=device)
+    module.train(mode)
+    out = module.transform(
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        )
+    )
+    assert objects_are_allclose(
+        out,
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        ),
+        equal_nan=True,
+    )
+
+
+@pytest.mark.parametrize("device", get_available_devices())
+@pytest.mark.parametrize("mode", [True, False])
+def test_standard_scaler_transform_nan_policy_raise(device: str, mode: bool) -> None:
+    device = torch.device(device)
+    module = StandardScaler(num_features=4, nan_policy="raise").to(device=device)
+    module.train(mode)
+    out = module.transform(
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        )
+    )
+    assert objects_are_equal(
+        out,
+        torch.tensor(
+            [[4.0, 3.0, 4.0, 1.0], [0.0, 1.0, 3.0, 3.0], [2.0, 2.0, float("nan"), 2.0]],
+            device=device,
+        ),
+        equal_nan=True,
+    )
 
 
 def test_standard_scaler_load_state_dict() -> None:

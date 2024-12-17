@@ -6,7 +6,7 @@ from coola import objects_are_allclose
 from coola.testing import numpy_available
 from coola.utils import is_numpy_available
 
-from tabutorch.nan import nanstd, nanvar
+from tabutorch.nan import nanmax, nanstd, nanvar
 
 if is_numpy_available():
     import numpy as np
@@ -16,6 +16,28 @@ def nan_values(tensor: torch.Tensor, ratio: float = 0.5) -> torch.Tensor:
     mask = torch.rand_like(tensor) < ratio
     tensor[mask] = float("nan")
     return tensor
+
+
+############################
+#     Tests for nanmax     #
+############################
+
+
+@numpy_available
+def test_nanmax() -> None:
+    x = nan_values(torch.randn(100, 10), ratio=0.2)
+    assert objects_are_allclose(nanmax(x), torch.tensor(np.nanmax(x)))
+
+
+@numpy_available
+@pytest.mark.parametrize("dim", [0, 1])
+@pytest.mark.parametrize("keepdim", [True, False])
+def test_nanmax_dim(dim: int, keepdim: bool) -> None:
+    x = nan_values(torch.randn(100, 10), ratio=0.2)
+    assert objects_are_allclose(
+        nanmax(x, dim=dim, keepdim=keepdim)[0].numpy(),
+        np.nanmax(x.numpy(), axis=dim, keepdims=keepdim),
+    )
 
 
 ############################

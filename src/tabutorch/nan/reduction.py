@@ -4,16 +4,14 @@ from __future__ import annotations
 
 __all__ = [
     "mean",
+    "nanmax",
     "nanstd",
     "nanvar",
     "std",
     "var",
 ]
 
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    import torch
+import torch
 
 
 def mean(
@@ -165,6 +163,45 @@ def var(
         return nanvar(x, dim=dim, correction=correction, keepdim=keepdim)
     msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
     raise ValueError(msg)
+
+
+def nanmax(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+) -> torch.Tensor | torch.return_types.max:
+    r"""Compute the maximum, while ignoring NaNs.
+
+    Args:
+        x: The input tensor.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        keepdim: Whether the output tensor has dim retained or not.
+
+    Returns:
+        The maximum, while ignoring NaNs.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import torch
+    >>> from tabutorch.nan import nanmax
+    >>> nanmax(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(3.)
+    >>> torch.max(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(nan)
+    >>> nanmax(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(3.)
+
+    ```
+    """
+    min_value = torch.finfo(x.dtype).min
+    x = x.nan_to_num(min_value)
+    if dim is None:
+        return x.max()
+    return x.max(dim=dim, keepdim=keepdim)
 
 
 def nanstd(

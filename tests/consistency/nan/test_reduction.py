@@ -1,11 +1,15 @@
 from __future__ import annotations
 
-import numpy as np
 import pytest
 import torch
 from coola import objects_are_allclose
+from coola.testing import numpy_available
+from coola.utils import is_numpy_available
 
 from tabutorch.nan import nanvar
+
+if is_numpy_available():
+    import numpy as np
 
 
 def nan_values(tensor: torch.Tensor, ratio: float = 0.5) -> torch.Tensor:
@@ -19,6 +23,7 @@ def nan_values(tensor: torch.Tensor, ratio: float = 0.5) -> torch.Tensor:
 ############################
 
 
+@numpy_available
 @pytest.mark.parametrize("correction", [0, 1])
 def test_nanvar(correction: int) -> None:
     x = nan_values(torch.randn(100, 10), ratio=0.2)
@@ -29,6 +34,7 @@ def test_nanvar(correction: int) -> None:
     )
 
 
+@numpy_available
 @pytest.mark.parametrize("dim", [0, 1])
 @pytest.mark.parametrize("correction", [0, 1])
 @pytest.mark.parametrize("keepdim", [True, False])

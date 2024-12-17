@@ -277,6 +277,23 @@ def test_nanmax_full_nan() -> None:
     )
 
 
+def test_nanmax_full_nan_dim() -> None:
+    assert objects_are_allclose(
+        nanmax(
+            torch.tensor(
+                [
+                    [float("nan"), float("nan"), 1.0],
+                    [float("nan"), float("nan"), 2.0],
+                    [float("nan"), float("nan"), 3.0],
+                ]
+            ),
+            dim=0,
+        ),
+        torch.tensor([float("nan"), float("nan"), 3.0]),
+        equal_nan=True,
+    )
+
+
 ############################
 #     Tests for nanstd     #
 ############################
@@ -405,6 +422,23 @@ def test_nanstd_full_nan() -> None:
     )
 
 
+def test_nanstd_full_nan_dim() -> None:
+    assert objects_are_allclose(
+        nanstd(
+            torch.tensor(
+                [
+                    [float("nan"), float("nan"), 1.0],
+                    [float("nan"), float("nan"), 2.0],
+                    [float("nan"), float("nan"), 3.0],
+                ]
+            ),
+            dim=0,
+        ),
+        torch.tensor([float("nan"), float("nan"), 1.0]),
+        equal_nan=True,
+    )
+
+
 ############################
 #     Tests for nanvar     #
 ############################
@@ -528,4 +562,21 @@ def test_nanvar_constant() -> None:
 def test_nanvar_full_nan() -> None:
     assert objects_are_allclose(
         nanvar(torch.full((2, 3), float("nan"))), torch.tensor(float("nan")), equal_nan=True
+    )
+
+
+def test_nanvar_full_nan_dim() -> None:
+    assert objects_are_allclose(
+        nanvar(
+            torch.tensor(
+                [
+                    [float("nan"), float("nan"), 1.0],
+                    [float("nan"), float("nan"), 2.0],
+                    [float("nan"), float("nan"), 3.0],
+                ]
+            ),
+            dim=0,
+        ),
+        torch.tensor([float("nan"), float("nan"), 1.0]),
+        equal_nan=True,
     )

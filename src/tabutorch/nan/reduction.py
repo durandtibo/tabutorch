@@ -29,8 +29,6 @@ def mean(
         x: The input tensor.
         dim: The dimension or dimensions to reduce.
             If ``None``, all dimensions are reduced.
-        correction: The difference between the sample size and sample
-            degrees of freedom.
         keepdim: Whether the output tensor has dim retained or not.
         nan_policy: The policy on how to handle NaN values in the input
             tensor when estimating the mean. The following options are

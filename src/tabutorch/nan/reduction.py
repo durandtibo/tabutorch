@@ -52,18 +52,27 @@ def mean(x: torch.Tensor, *args: Any, nan_policy: str = "propagate", **kwargs: A
     raise ValueError(msg)
 
 
-def std(x: torch.Tensor, *args: Any, correction=1, nan_policy: str = "propagate", **kwargs: Any) -> torch.Tensor:
+def std(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    correction: int = 1,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.Tensor:
     r"""Return the standard deviation values.
 
     Args:
         x: The input tensor.
-        *args: Positional arguments of ``torch.std`` or
-            ``torch.nanstd``.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        correction: The difference between the sample size and sample
+            degrees of freedom.
+        keepdim: Whether the output tensor has dim retained or not.
         nan_policy: The policy on how to handle NaN values in the input
-            tensor when estimating the std. The following options are
-            available: ``'omit'`` and ``'propagate'``.
-        **kwargs: Keyword arguments of ``torch.std`` or
-            ``torch.nanstd``.
+            tensor when estimating the standard deviation.
+            The following options are available: ``'omit'`` and
+            ``'propagate'``.
 
     Returns:
         Returns the standard deviation values.
@@ -78,18 +87,18 @@ def std(x: torch.Tensor, *args: Any, correction=1, nan_policy: str = "propagate"
     >>> import torch
     >>> from tabutorch.nan import std
     >>> std(torch.tensor([1.0, 2.0, 3.0]))
-    tensor(2.)
-    >>> std(torch.tensor([1.0, 2.0, float("nan")]))
+    tensor(1.)
+    >>> std(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
     tensor(nan)
-    >>> std(torch.tensor([1.0, 2.0, float("nan")]), nan_policy="omit")
-    tensor(1.5000)
+    >>> std(torch.tensor([1.0, 2.0, 3.0, float("nan")]), nan_policy="omit")
+    tensor(1.)
 
     ```
     """
     if nan_policy == "propagate":
-        return x.std(*args, **kwargs)
+        return x.std(dim=dim, correction=correction, keepdim=keepdim)
     if nan_policy == "omit":
-        return nanstd(x, *args, **kwargs)
+        return nanstd(x, dim=dim, correction=correction, keepdim=keepdim)
     msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
     raise ValueError(msg)
 

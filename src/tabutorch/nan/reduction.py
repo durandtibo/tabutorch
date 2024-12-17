@@ -4,24 +4,31 @@ from __future__ import annotations
 
 __all__ = ["mean", "nanstd", "nanvar", "std"]
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import torch
 
 
-def mean(x: torch.Tensor, *args: Any, nan_policy: str = "propagate", **kwargs: Any) -> torch.Tensor:
+def mean(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.Tensor:
     r"""Return the mean values.
 
     Args:
         x: The input tensor.
-        *args: Positional arguments of ``torch.mean`` or
-            ``torch.nanmean``.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        correction: The difference between the sample size and sample
+            degrees of freedom.
+        keepdim: Whether the output tensor has dim retained or not.
         nan_policy: The policy on how to handle NaN values in the input
             tensor when estimating the mean. The following options are
             available: ``'omit'`` and ``'propagate'``.
-        **kwargs: Keyword arguments of ``torch.mean`` or
-            ``torch.nanmean``.
 
     Returns:
         Returns the mean values.
@@ -45,9 +52,9 @@ def mean(x: torch.Tensor, *args: Any, nan_policy: str = "propagate", **kwargs: A
     ```
     """
     if nan_policy == "propagate":
-        return x.mean(*args, **kwargs)
+        return x.mean(dim=dim, keepdim=keepdim)
     if nan_policy == "omit":
-        return x.nanmean(*args, **kwargs)
+        return x.nanmean(dim=dim, keepdim=keepdim)
     msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
     raise ValueError(msg)
 

@@ -21,7 +21,7 @@ def test_mean_nan_omit() -> None:
     )
 
 
-def test_mean_nan_omit_args() -> None:
+def test_mean_nan_omit_dim() -> None:
     assert objects_are_equal(
         mean(
             torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]),
@@ -41,7 +41,7 @@ def test_mean_nan_propagate() -> None:
     )
 
 
-def test_mean_nan_propagate_args() -> None:
+def test_mean_nan_propagate_dim() -> None:
     assert objects_are_equal(
         mean(torch.tensor([[1.0, 2.0, float("nan")], [4.0, 5.0, 6.0]]), dim=1, keepdim=True),
         torch.tensor([[float("nan")], [5.0]]),

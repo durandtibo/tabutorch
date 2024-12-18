@@ -196,10 +196,17 @@ def nanmax(
     ```
     """
     min_value = torch.finfo(x.dtype).min
-    x = x.nan_to_num(min_value)
+    mask = x.isnan()
     if dim is None:
-        return x.max()
-    return x.max(dim=dim, keepdim=keepdim)
+        if mask.all():
+            return torch.tensor(float("nan"))
+        return x.nan_to_num(min_value).max()
+
+    res = x.nan_to_num(min_value).max(dim=dim, keepdim=keepdim)
+    mask = mask.all(dim=dim, keepdim=keepdim)
+    if mask.any():
+        res[0][mask] = float("nan")
+    return res
 
 
 def nanstd(

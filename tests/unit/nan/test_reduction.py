@@ -278,20 +278,20 @@ def test_nanmax_full_nan() -> None:
 
 
 def test_nanmax_full_nan_dim() -> None:
-    assert objects_are_allclose(
-        nanmax(
-            torch.tensor(
-                [
-                    [float("nan"), float("nan"), 1.0],
-                    [float("nan"), float("nan"), 2.0],
-                    [float("nan"), float("nan"), 3.0],
-                ]
-            ),
-            dim=0,
+    values, indices = nanmax(
+        torch.tensor(
+            [
+                [float("nan"), float("nan"), 1.0],
+                [float("nan"), float("nan"), 2.0],
+                [float("nan"), float("nan"), 3.0],
+            ]
         ),
-        torch.tensor([float("nan"), float("nan"), 3.0]),
-        equal_nan=True,
+        dim=0,
     )
+    assert objects_are_allclose(
+        values, torch.tensor([float("nan"), float("nan"), 3.0]), equal_nan=True
+    )
+    assert objects_are_allclose(indices, torch.tensor([0, 0, 2]))
 
 
 ############################

@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 import torch
+from typing_extensions import overload
 
 
 def mean(
@@ -163,6 +164,16 @@ def var(
     raise ValueError(msg)
 
 
+@overload
+def nanmax(x: torch.Tensor, dim: None = None) -> torch.Tensor: ...  # pragma: no cover
+
+
+@overload
+def nanmax(
+    x: torch.Tensor, dim: int | tuple[int, ...], *, keepdim: bool = False
+) -> torch.return_types.max: ...  # pragma: no cover
+
+
 def nanmax(
     x: torch.Tensor,
     dim: int | tuple[int, ...] | None = None,
@@ -195,15 +206,28 @@ def nanmax(
 
     ```
     """
+    if dim is None:
+        return _nanmax_without_dim(x)
+    return _nanmax_with_dim(x, dim=dim, keepdim=keepdim)
+
+
+def _nanmax_without_dim(x: torch.Tensor) -> torch.Tensor:
     min_value = torch.finfo(x.dtype).min
     mask = x.isnan()
-    if dim is None:
-        if mask.all():
-            return torch.tensor(float("nan"))
-        return x.nan_to_num(min_value).max()
+    if mask.all():
+        return torch.tensor(float("nan"))
+    return x.nan_to_num(min_value).max()
 
+
+def _nanmax_with_dim(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+) -> torch.return_types.max:
+    min_value = torch.finfo(x.dtype).min
     res = x.nan_to_num(min_value).max(dim=dim, keepdim=keepdim)
-    mask = mask.all(dim=dim, keepdim=keepdim)
+    mask = x.isnan().all(dim=dim, keepdim=keepdim)
     if mask.any():
         res[0][mask] = float("nan")
     return res

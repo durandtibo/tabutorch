@@ -232,7 +232,7 @@ def test_nanmax_dim_1() -> None:
     assert objects_are_equal(indices, torch.tensor([3, 3, 3]))
 
 
-def test_nanmax_correction_keepdim_2d() -> None:
+def test_nanmax_keepdim_2d() -> None:
     values, indices = nanmax(
         torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
         keepdim=True,
@@ -242,7 +242,7 @@ def test_nanmax_correction_keepdim_2d() -> None:
     assert objects_are_equal(indices, torch.tensor([[1, 2, 2, 2]]))
 
 
-def test_nanmax_correction_keepdim_3d() -> None:
+def test_nanmax_keepdim_3d() -> None:
     values, indices = nanmax(
         torch.tensor(
             [

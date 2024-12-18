@@ -6,6 +6,8 @@ __all__ = [
     "check_nan_policy",
     "contains_nan",
     "mean",
+    "nanmax",
+    "nanmin",
     "nanstd",
     "nanvar",
     "std",
@@ -13,4 +15,4 @@ __all__ = [
 ]
 
 from tabutorch.nan.policy import check_nan_policy, contains_nan
-from tabutorch.nan.reduction import mean, nanstd, nanvar, std, var
+from tabutorch.nan.reduction import mean, nanmax, nanmin, nanstd, nanvar, std, var

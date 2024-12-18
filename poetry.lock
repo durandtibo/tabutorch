@@ -2292,5 +2292,5 @@ all = ["numpy", "numpy", "objectory", "scikit-learn"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = ">=3.9,<3.14"
-content-hash = "cef6867708b505d0aca5aaf8440936858eecacfb4f9620c59f480bd012c3f531"
+python-versions = ">=3.9,<3.13"
+content-hash = "c6a6b5ee2d1134a3e2a154e53128e2ce36fbac97feb7e14a0e743c1beacc77f0"

@@ -1,16 +1,17 @@
 [tool.poetry]
 name = "tabutorch"
-version = "0.1.2a0"
+version = "0.0.1a1"
 description = "A light library to preprocess data with polars"
 readme = "README.md"
 authors = ["Thibaut Durand <durand.tibo+gh@gmail.com>"]
 homepage = "https://github.com/durandtibo/tabutorch"
 repository = "https://github.com/durandtibo/tabutorch"
 keywords = [
-    "torch",
-    "tabular",
+    "ML",
     "architecture",
     "data",
+    "tabular",
+    "torch",
 ]
 license = "BSD-3-Clause"
 
@@ -37,7 +38,7 @@ packages = [
 [tool.poetry.dependencies]
 # Core dependencies
 coola = ">=0.8.5,<1.0"
-python = ">=3.9,<3.14"
+python = ">=3.9,<3.13"
 torch = [
     { version = ">=1.12,<2.3", markers = "sys_platform == 'darwin' and platform_machine != 'arm64'" },
     { version = ">=1.12,<3.0" }

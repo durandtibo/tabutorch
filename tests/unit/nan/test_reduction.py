@@ -4,7 +4,7 @@ import pytest
 import torch
 from coola import objects_are_allclose, objects_are_equal
 
-from tabutorch.nan import mean, nanmax, nanstd, nanvar, std, var
+from tabutorch.nan import mean, nanmax, nanmin, nanstd, nanvar, std, var
 
 ##########################
 #     Tests for mean     #
@@ -292,6 +292,106 @@ def test_nanmax_full_nan_dim() -> None:
         values, torch.tensor([float("nan"), float("nan"), 3.0]), equal_nan=True
     )
     assert objects_are_allclose(indices, torch.tensor([0, 0, 2]))
+
+
+############################
+#     Tests for nanmin     #
+############################
+
+
+@pytest.mark.parametrize(
+    "x",
+    [
+        torch.tensor([0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, float("nan"), 9.0]),
+        torch.tensor([[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]),
+        torch.tensor([[[0.0, 1.0, 2.0, 3.0, 4.0], [5.0, 6.0, 7.0, float("nan"), 9.0]]]),
+    ],
+)
+def test_nanmin(x: torch.Tensor) -> None:
+    assert objects_are_allclose(nanmin(x), torch.tensor(0.0))
+
+
+def test_nanmin_dim_0() -> None:
+    values, indices = nanmin(
+        torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
+        dim=0,
+    )
+    assert objects_are_allclose(
+        values,
+        torch.tensor([0.0, 1.0, 2.0, 3.0]),
+    )
+    assert objects_are_equal(indices, torch.tensor([0, 0, 0, 0]))
+
+
+def test_nanmin_dim_1() -> None:
+    values, indices = nanmin(
+        torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
+        dim=1,
+    )
+    assert objects_are_allclose(values, torch.tensor([0.0, 4.0, 9.0]))
+    assert objects_are_equal(indices, torch.tensor([0, 0, 1]))
+
+
+def test_nanmin_keepdim_2d() -> None:
+    values, indices = nanmin(
+        torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
+        keepdim=True,
+        dim=0,
+    )
+    assert objects_are_allclose(values, torch.tensor([[0.0, 1.0, 2.0, 3.0]]))
+    assert objects_are_equal(indices, torch.tensor([[0, 0, 0, 0]]))
+
+
+def test_nanmin_keepdim_3d() -> None:
+    values, indices = nanmin(
+        torch.tensor(
+            [
+                [
+                    [0.0, 1.0, 2.0, 3.0],
+                    [4.0, 5.0, 6.0, 7.0],
+                    [float("nan"), 9.0, 10.0, 11.0],
+                ],
+                [
+                    [10.0, float("nan"), 12.0, 13.0],
+                    [14.0, 15.0, 16.0, 17.0],
+                    [18.0, 19.0, 20.0, 21.0],
+                ],
+            ]
+        ),
+        keepdim=True,
+        dim=1,
+    )
+    assert objects_are_allclose(
+        values, torch.tensor([[[0.0, 1.0, 2.0, 3.0]], [[10.0, 15.0, 12.0, 13.0]]])
+    )
+    assert objects_are_equal(indices, torch.tensor([[[0, 0, 0, 0]], [[0, 1, 0, 0]]]))
+
+
+def test_nanmin_constant() -> None:
+    assert objects_are_allclose(nanmin(torch.ones(2, 3, 4)), torch.tensor(1.0))
+
+
+def test_nanmin_full_nan() -> None:
+    assert objects_are_allclose(
+        nanmin(torch.full((2, 3), float("nan"))), torch.tensor(float("nan")), equal_nan=True
+    )
+
+
+def test_nanmin_full_nan_dim() -> None:
+    values, indices = nanmin(
+        torch.tensor(
+            [
+                [float("nan"), float("nan"), 1.0],
+                [float("nan"), float("nan"), 2.0],
+                [float("nan"), float("nan"), 3.0],
+            ]
+        ),
+        dim=0,
+    )
+    assert objects_are_allclose(
+        values, torch.tensor([float("nan"), float("nan"), 1.0]), equal_nan=True
+    )
+    assert objects_are_allclose(indices, torch.tensor([0, 0, 0]))
 
 
 ############################

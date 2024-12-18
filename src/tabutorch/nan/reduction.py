@@ -268,11 +268,11 @@ def nanmin(
     >>> import torch
     >>> from tabutorch.nan import nanmin
     >>> nanmin(torch.tensor([1.0, 2.0, 3.0]))
-    tensor(3.)
+    tensor(1.)
     >>> torch.min(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
     tensor(nan)
     >>> nanmin(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
-    tensor(3.)
+    tensor(1.)
 
     ```
     """

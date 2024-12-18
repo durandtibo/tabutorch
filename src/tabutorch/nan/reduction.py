@@ -5,6 +5,7 @@ from __future__ import annotations
 __all__ = [
     "mean",
     "nanmax",
+    "nanmin",
     "nanstd",
     "nanvar",
     "std",
@@ -227,6 +228,75 @@ def _nanmax_with_dim(
 ) -> torch.return_types.max:
     min_value = torch.finfo(x.dtype).min
     res = x.nan_to_num(min_value).max(dim=dim, keepdim=keepdim)
+    mask = x.isnan().all(dim=dim, keepdim=keepdim)
+    if mask.any():
+        res[0][mask] = float("nan")
+    return res
+
+
+@overload
+def nanmin(x: torch.Tensor, dim: None = None) -> torch.Tensor: ...  # pragma: no cover
+
+
+@overload
+def nanmin(
+    x: torch.Tensor, dim: int | tuple[int, ...], *, keepdim: bool = False
+) -> torch.return_types.min: ...  # pragma: no cover
+
+
+def nanmin(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+) -> torch.Tensor | torch.return_types.min:
+    r"""Compute the minimum, while ignoring NaNs.
+
+    Args:
+        x: The input tensor.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        keepdim: Whether the output tensor has dim retained or not.
+
+    Returns:
+        The minimum, while ignoring NaNs.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import torch
+    >>> from tabutorch.nan import nanmin
+    >>> nanmin(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(1.)
+    >>> torch.min(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(nan)
+    >>> nanmin(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(1.)
+
+    ```
+    """
+    if dim is None:
+        return _nanmin_without_dim(x)
+    return _nanmin_with_dim(x, dim=dim, keepdim=keepdim)
+
+
+def _nanmin_without_dim(x: torch.Tensor) -> torch.Tensor:
+    min_value = torch.finfo(x.dtype).max
+    mask = x.isnan()
+    if mask.all():
+        return torch.tensor(float("nan"))
+    return x.nan_to_num(min_value).min()
+
+
+def _nanmin_with_dim(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+) -> torch.return_types.min:
+    min_value = torch.finfo(x.dtype).max
+    res = x.nan_to_num(min_value).min(dim=dim, keepdim=keepdim)
     mask = x.isnan().all(dim=dim, keepdim=keepdim)
     if mask.any():
         res[0][mask] = float("nan")

@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 import torch
 
-from tabutorch.nan.policy import check_nan_policy, contains_nan
+from tabutorch.nan import check_nan_policy, contains_nan
 
 NAN_POLICIES = ["omit", "propagate", "raise"]
 

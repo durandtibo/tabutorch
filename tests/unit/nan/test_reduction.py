@@ -4,7 +4,61 @@ import pytest
 import torch
 from coola import objects_are_allclose, objects_are_equal
 
-from tabutorch.nan import mean, nanmax, nanmin, nanstd, nanvar, std, var
+from tabutorch.nan import mean, nanmax, nanmin, nanstd, nanvar, nmax, std, var
+
+#############################
+#     Tests for nmax     #
+#############################
+
+
+def test_nmax_no_nan() -> None:
+    assert objects_are_equal(max(torch.tensor([1.0, 2.0, 3.0, 4.0, 5.0])), torch.tensor(5.0))
+
+
+def test_nmax_nan_omit() -> None:
+    assert objects_are_equal(
+        nmax(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="omit"),
+        torch.tensor(5.0),
+    )
+
+
+def test_nmax_nan_omit_dim() -> None:
+    values, indices = nmax(
+        torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
+        dim=0,
+        keepdim=True,
+        nan_policy="omit",
+    )
+    assert objects_are_allclose(values, torch.tensor([[4.0, 9.0, 10.0, 11.0]]))
+    assert objects_are_equal(indices, torch.tensor([[1, 2, 2, 2]]))
+
+
+def test_nmax_nan_propagate() -> None:
+    assert objects_are_equal(
+        nmax(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0])),
+        torch.tensor(float("nan")),
+        equal_nan=True,
+    )
+
+
+def test_nmax_nan_propagate_dim() -> None:
+    values, indices = nmax(
+        torch.tensor([[0.0, 1.0, 2.0, 3.0], [4.0, 5.0, 6.0, 7.0], [float("nan"), 9.0, 10.0, 11.0]]),
+        dim=0,
+        keepdim=True,
+    )
+    assert objects_are_allclose(
+        values,
+        torch.tensor([[float("nan"), 9.0, 10.0, 11.0]]),
+        equal_nan=True,
+    )
+    assert objects_are_equal(indices, torch.tensor([[2, 2, 2, 2]]))
+
+
+def test_nmax_incorrect_nan_policy() -> None:
+    with pytest.raises(ValueError, match="Incorrect 'nan_policy': incorrect"):
+        nmax(torch.tensor([1.0, 2.0, float("nan"), 4.0, 5.0]), nan_policy="incorrect")
+
 
 ##########################
 #     Tests for mean     #

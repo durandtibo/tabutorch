@@ -8,12 +8,78 @@ __all__ = [
     "nanmin",
     "nanstd",
     "nanvar",
+    "nmax",
     "std",
     "var",
 ]
 
 import torch
 from typing_extensions import overload
+
+
+@overload
+def nmax(
+    x: torch.Tensor, dim: None = None, nan_policy: str = "propagate"
+) -> torch.Tensor: ...  # pragma: no cover
+
+
+@overload
+def nmax(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...],
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.return_types.max: ...  # pragma: no cover
+
+
+def nmax(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.Tensor | torch.return_types.max:
+    r"""Return the maximum values.
+
+    Args:
+        x: The input tensor.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        correction: The difference between the sample size and sample
+            degrees of freedom.
+        keepdim: Whether the output tensor has dim retained or not.
+        nan_policy: The policy on how to handle NaN values in the input
+            tensor when estimating the max. The following options are
+            available: ``'omit'`` and ``'propagate'``.
+
+    Returns:
+        Returns the maximum values.
+
+    Raises:
+        ValueError: if the ``nan_policy`` value is incorrect.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import torch
+    >>> from tabutorch.nan import nmax
+    >>> nmax(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(3.)
+    >>> torch.max(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(nan)
+    >>> nmax(torch.tensor([1.0, 2.0, 3.0, float("nan")]), nan_policy="omit")
+    tensor(3.)
+
+    ```
+    """
+    if nan_policy == "propagate":
+        return x.max() if dim is None else x.max(dim=dim, keepdim=keepdim)
+    if nan_policy == "omit":
+        return nanmax(x, dim=dim, keepdim=keepdim)
+    msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
+    raise ValueError(msg)
 
 
 def mean(

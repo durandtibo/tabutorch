@@ -3,12 +3,12 @@ r"""Contain reduction functions to manage tensors with NaN values."""
 from __future__ import annotations
 
 __all__ = [
-    "max",
     "mean",
     "nanmax",
     "nanmin",
     "nanstd",
     "nanvar",
+    "nmax",
     "std",
     "var",
 ]
@@ -17,14 +17,30 @@ import torch
 from typing_extensions import overload
 
 
-def max(
+@overload
+def nmax(
+    x: torch.Tensor, dim: None = None, nan_policy: str = "propagate"
+) -> torch.Tensor: ...  # pragma: no cover
+
+
+@overload
+def nmax(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...],
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.return_types.max: ...  # pragma: no cover
+
+
+def nmax(
     x: torch.Tensor,
     dim: int | tuple[int, ...] | None = None,
     *,
     keepdim: bool = False,
     nan_policy: str = "propagate",
 ) -> torch.Tensor | torch.return_types.max:
-    r"""Return the max values.
+    r"""Return the maximum values.
 
     Args:
         x: The input tensor.
@@ -38,7 +54,7 @@ def max(
             available: ``'omit'`` and ``'propagate'``.
 
     Returns:
-        Returns the max values.
+        Returns the maximum values.
 
     Raises:
         ValueError: if the ``nan_policy`` value is incorrect.
@@ -48,20 +64,20 @@ def max(
     ```pycon
 
     >>> import torch
-    >>> from tabutorch.nan import max
-    >>> max(torch.tensor([1.0, 2.0, 3.0]))
-    tensor(2.)
-    >>> max(torch.tensor([1.0, 2.0, float("nan")]))
+    >>> from tabutorch.nan import nmax
+    >>> nmax(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(3.)
+    >>> torch.max(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
     tensor(nan)
-    >>> max(torch.tensor([1.0, 2.0, float("nan")]), nan_policy="omit")
-    tensor(1.5000)
+    >>> nmax(torch.tensor([1.0, 2.0, 3.0, float("nan")]), nan_policy="omit")
+    tensor(3.)
 
     ```
     """
     if nan_policy == "propagate":
-        return x.max(dim=dim, keepdim=keepdim)
+        return x.max() if dim is None else x.max(dim=dim, keepdim=keepdim)
     if nan_policy == "omit":
-        return x.nanmax(dim=dim, keepdim=keepdim)
+        return nanmax(x, dim=dim, keepdim=keepdim)
     msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
     raise ValueError(msg)
 

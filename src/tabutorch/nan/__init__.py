@@ -11,9 +11,20 @@ __all__ = [
     "nanstd",
     "nanvar",
     "nmax",
+    "nmin",
     "std",
     "var",
 ]
 
 from tabutorch.nan.policy import check_nan_policy, contains_nan
-from tabutorch.nan.reduction import mean, nanmax, nanmin, nanstd, nanvar, nmax, std, var
+from tabutorch.nan.reduction import (
+    mean,
+    nanmax,
+    nanmin,
+    nanstd,
+    nanvar,
+    nmax,
+    nmin,
+    std,
+    var,
+)

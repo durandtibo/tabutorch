@@ -50,8 +50,8 @@ def nmax(
             degrees of freedom.
         keepdim: Whether the output tensor has dim retained or not.
         nan_policy: The policy on how to handle NaN values in the input
-            tensor when estimating the max. The following options are
-            available: ``'omit'`` and ``'propagate'``.
+            tensor when estimating the maximum. The following options
+            are available: ``'omit'`` and ``'propagate'``.
 
     Returns:
         Returns the maximum values.
@@ -78,6 +78,71 @@ def nmax(
         return x.max() if dim is None else x.max(dim=dim, keepdim=keepdim)
     if nan_policy == "omit":
         return nanmax(x, dim=dim, keepdim=keepdim)
+    msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
+    raise ValueError(msg)
+
+
+@overload
+def nmin(
+    x: torch.Tensor, dim: None = None, nan_policy: str = "propagate"
+) -> torch.Tensor: ...  # pragma: no cover
+
+
+@overload
+def nmin(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...],
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.return_types.min: ...  # pragma: no cover
+
+
+def nmin(
+    x: torch.Tensor,
+    dim: int | tuple[int, ...] | None = None,
+    *,
+    keepdim: bool = False,
+    nan_policy: str = "propagate",
+) -> torch.Tensor | torch.return_types.min:
+    r"""Return the minimum values.
+
+    Args:
+        x: The input tensor.
+        dim: The dimension or dimensions to reduce.
+            If ``None``, all dimensions are reduced.
+        correction: The difference between the sample size and sample
+            degrees of freedom.
+        keepdim: Whether the output tensor has dim retained or not.
+        nan_policy: The policy on how to handle NaN values in the input
+            tensor when estimating the minimum. The following options
+            are available: ``'omit'`` and ``'propagate'``.
+
+    Returns:
+        Returns the minimum values.
+
+    Raises:
+        ValueError: if the ``nan_policy`` value is incorrect.
+
+    Example usage:
+
+    ```pycon
+
+    >>> import torch
+    >>> from tabutorch.nan import nmin
+    >>> nmin(torch.tensor([1.0, 2.0, 3.0]))
+    tensor(1.)
+    >>> torch.min(torch.tensor([1.0, 2.0, 3.0, float("nan")]))
+    tensor(nan)
+    >>> nmin(torch.tensor([1.0, 2.0, 3.0, float("nan")]), nan_policy="omit")
+    tensor(1.)
+
+    ```
+    """
+    if nan_policy == "propagate":
+        return x.min() if dim is None else x.min(dim=dim, keepdim=keepdim)
+    if nan_policy == "omit":
+        return nanmin(x, dim=dim, keepdim=keepdim)
     msg = f"Incorrect 'nan_policy': {nan_policy}. The valid values are: 'omit' and 'propagate'"
     raise ValueError(msg)
 

@@ -40,7 +40,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'coola'
           package-version: ${{ matrix.coola-version }}
@@ -92,7 +92,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'torch'
           package-version: ${{ matrix.torch-version }}
@@ -155,7 +155,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'numpy'
           package-version: ${{ matrix.numpy-version }}
@@ -207,7 +207,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'objectory'
           package-version: ${{ matrix.objectory-version }}
@@ -259,7 +259,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.2
+        uses: durandtibo/pip-install-package-action@v0.3.3
         with:
           package-name: 'scikit-learn'
           package-version: ${{ matrix.scikit-learn-version }}

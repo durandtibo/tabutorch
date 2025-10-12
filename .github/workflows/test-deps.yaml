@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -40,7 +40,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.3
+        uses: durandtibo/pip-install-package-action@v0.3.4
         with:
           package-name: 'coola'
           package-version: ${{ matrix.coola-version }}
@@ -83,7 +83,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -102,7 +102,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.3
+        uses: durandtibo/pip-install-package-action@v0.3.4
         with:
           package-name: 'torch'
           package-version: ${{ matrix.torch-version }}
@@ -154,7 +154,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -173,7 +173,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.3
+        uses: durandtibo/pip-install-package-action@v0.3.4
         with:
           package-name: 'numpy'
           package-version: ${{ matrix.numpy-version }}
@@ -206,7 +206,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -225,7 +225,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.3
+        uses: durandtibo/pip-install-package-action@v0.3.4
         with:
           package-name: 'objectory'
           package-version: ${{ matrix.objectory-version }}
@@ -267,7 +267,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Set up Python
         uses: actions/setup-python@v6
@@ -286,7 +286,7 @@ jobs:
           make install
 
       - name: Install valid package version
-        uses: durandtibo/pip-install-package-action@v0.3.3
+        uses: durandtibo/pip-install-package-action@v0.3.4
         with:
           package-name: 'scikit-learn'
           package-version: ${{ matrix.scikit-learn-version }}

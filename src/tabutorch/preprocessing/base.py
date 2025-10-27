@@ -12,7 +12,7 @@ from torch.nn import Module
 T = TypeVar("T")
 
 
-class BaseTransformer(Generic[T], Module):
+class BaseTransformer(Module, Generic[T]):
     r"""Define the base class to implement a data transformer."""
 
     def forward(self, x: T) -> T:
